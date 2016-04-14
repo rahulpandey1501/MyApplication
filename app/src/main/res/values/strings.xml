@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">xApps</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="banner_ad_unit_id">ca-app-pub-5057724905062766/3344005739</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="title_activity_content_view"></string>
+    <string name="interstitial_ad_unit_id">ca-app-pub-5057724905062766/7355402935</string>
+</resources>
