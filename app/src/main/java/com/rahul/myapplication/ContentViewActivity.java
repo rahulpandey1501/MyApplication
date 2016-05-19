@@ -4,7 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -16,10 +19,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -30,6 +36,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.InterstitialAd;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -52,26 +59,53 @@ public class ContentViewActivity extends AppCompatActivity {
     ImageView imageView;
     List<Information> list = new ArrayList<>();
     private InterstitialAd mInterstitialAd;
+    View rootLayout, downloadLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         super.onCreate(savedInstanceState);
         initializeAd();
-        Typeface tf = Typeface.createFromAsset(getAssets(), "fonts/Montserrat-Regular.ttf");
+        Typeface tfLight = Typeface.createFromAsset(getAssets(), "fonts/OpenSans-CondLight.ttf");
+//        Typeface tfBold = Typeface.createFromAsset(getAssets(), "fonts/OpenSans-CondBold.ttf");
+        Typeface tfRoboto = Typeface.createFromAsset(getAssets(), "fonts/Roboto-Light.ttf");
         setContentView(R.layout.activity_content_view);
         textView= (TextView)findViewById(R.id.desc);
         titleTextView = (TextView) findViewById(content_title);
-        textView.setTypeface(tf);
+        textView.setTypeface(tfRoboto);
         imageView = (ImageView) findViewById(R.id.imageView);
+        rootLayout = findViewById(R.id.root_layout);
+        downloadLoading = findViewById(R.id.download_link_loading);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         Intent intent = getIntent();
         titleTextView.setText(intent.getStringExtra("title"));
-        titleTextView.setTypeface(tf);
+//        titleTextView.setTypeface(tfBold);
         link = intent.getStringExtra("next_link");
         desc = intent.getStringExtra("desc");
         image_link = intent.getStringExtra("image_link");
         textView.setText(desc);
+        getSupportActionBar().setTitle("Please wait...");
+        Picasso.with(ContentViewActivity.this).load(image_link).into(imageView);
+
+//        Picasso.with(getApplicationContext()).load(image_link).placeholder(getResources().getDrawable(R.drawable.header)).into(new Target() {
+//            @Override
+//            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
+//                rootLayout.setBackground(new BitmapDrawable(getResources(), BlurBuilder.blur(getApplicationContext(), bitmap)));
+//            }
+//
+//            @Override
+//            public void onBitmapFailed(Drawable drawable) {
+//
+//            }
+//
+//            @Override
+//            public void onPrepareLoad(Drawable drawable) {
+//
+//            }
+//        });
 
         textView.setMovementMethod(new ScrollingMovementMethod());
         ((AppCompatActivity) this).getSupportActionBar().setHomeButtonEnabled(true);
@@ -120,11 +154,18 @@ public class ContentViewActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        finish();
+        overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
+        super.onBackPressed();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
-//                onBackPressed();
+                overridePendingTransition(R.anim.left_to_right, R.anim.right_to_left);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -132,14 +173,10 @@ public class ContentViewActivity extends AppCompatActivity {
 
     class JsoupAsyncTask extends AsyncTask<String, Void, Boolean> {
 
-        private ProgressDialog dialog;
         @Override
         protected void onPreExecute() {
             recyclerView.setVisibility(View.GONE);
-            dialog = new ProgressDialog(ContentViewActivity.this);
-            dialog.setMessage("Please Wait !");
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.show();
+            downloadLoading.setVisibility(View.VISIBLE);
             super.onPreExecute();
         }
 
@@ -175,16 +212,15 @@ public class ContentViewActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Boolean th){
-            ((AppCompatActivity)ContentViewActivity.this).getSupportActionBar().setTitle(title);
+            getSupportActionBar().setTitle(Html.fromHtml("<small>" + getIntent().getStringExtra("title") + "</small>"));
             findViewById(R.id.recyclerList).setVisibility(View.VISIBLE);
 //            titleTextView.setText(title);
-            myAdapter = new MyAdapter(getApplicationContext(), list, false);
+            myAdapter = new MyAdapter(ContentViewActivity.this, list, false);
             recyclerView.setAdapter(myAdapter);
             recyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-            if (dialog.isShowing())
-                dialog.dismiss();
-            Picasso.with(ContentViewActivity.this).load(image_link).into(imageView);
-
+            downloadLoading.setVisibility(View.GONE);
+//            if (dialog.isShowing())
+//                dialog.dismiss();
         }
     }
 

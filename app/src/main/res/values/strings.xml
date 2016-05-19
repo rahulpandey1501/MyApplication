@@ -1,14 +1,50 @@
 <resources>
     <string name="app_name">xApps</string>
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
-
     <string name="action_settings">Settings</string>
     <string name="banner_ad_unit_id">ca-app-pub-5057724905062766/3344005739</string>
-
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_content_view"></string>
     <string name="interstitial_ad_unit_id">ca-app-pub-5057724905062766/7355402935</string>
+    <string-array name="supported_link_host">
+        <item>Mega.co.nz</item>
+        <item>4Shared</item>
+        <item>1Fichier</item>
+        <item>Tusfiles</item>
+        <item>Solidfiles</item>
+        <item>YouTube</item>
+        <item>Dailymotion</item>
+        <item>Soundcloud</item>
+        <item>Indishare</item>
+        <item>Google Play</item>
+        <item>Dropbox</item>
+        <item>Mirrorcreator</item>
+        <item>Datafilehost</item>
+        <item>Scribd</item>
+        <item>Slideshare</item>
+        <item>2Shared</item>
+        <item>Facebook Video</item>
+        <item>Instagram Video</item>
+        <item>Vimeo</item>
+        <item>Uppit</item>
+        <item>Gett</item>
+        <item>Upload.mobi</item>
+        <item>qfs.mobi</item>
+        <item>Elsfile</item>
+        <item>Zxcfiles</item>
+        <item>Acefiles</item>
+        <item>Sendspace</item>
+        <item>Sharemods</item>
+        <item>Mp4upload</item>
+        <item>Anonfiles</item>
+        <item>Filefenix</item>
+        <item>Dailyuploads</item>
+        <item>Clicknupload</item>
+        <item>AWSCloud</item>
+        <item>Userscloud</item>
+        <item>Usersfiles</item>
+        <item>RGhost</item>
+    </string-array>
 </resources>

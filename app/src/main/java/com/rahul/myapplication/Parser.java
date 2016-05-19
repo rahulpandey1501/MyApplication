@@ -1,6 +1,7 @@
 package com.rahul.myapplication;
 
 
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -49,6 +50,7 @@ public class Parser extends Fragment {
     public Parser() {
         // Required empty public constructor
     }
+    @SuppressLint("ValidFragment")
     public Parser(String link, String title,List<Information> list, boolean fromSearch){
         this.link = link;
         this.title = title;

@@ -1,5 +1,6 @@
 package com.rahul.myapplication;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -64,10 +65,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View v) {
-//                    sharedPreferencesEditor.putString("next_link", information.link);
-//                    sharedPreferencesEditor.putString("desc", information.desc);
-//                    sharedPreferencesEditor.putString("image_link", information.image_link);
-//                    sharedPreferencesEditor.commit();
                     Toast.makeText(context, information.title, Toast.LENGTH_LONG).show();
                     return true;
                 }
@@ -81,17 +78,31 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                     intent.putExtra("image_link", information.image_link);
                     intent.putExtra("title", information.title);
                     context.startActivity(intent);
+                    ((Activity) context).overridePendingTransition(R.anim.enter, R.anim.exit);
                 }
             });
         }else{
             holder.dTitle.setText(information.title);
             holder.dLink.setText(information.link);
+            for (String link: DirectSupportedLink.supportedLink){
+                if(information.link.toLowerCase().contains(link.toLowerCase())) {
+                    holder.dLink.setText(information.link + "  [DIRECT]");
+                    break;
+                }
+            }
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.SHORTEST_API_TOKEN_LINK+information.link));
-                    browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(browserIntent);
+                    DirectLinkGenerator dlg = new DirectLinkGenerator();
+                    String link = dlg.checkForLink(information.link, context);
+                    Intent browserIntent;
+//                    if (link != null){
+//                        browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+//                    }else {
+//                        browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(information.link));
+//                    }
+//                    browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    context.startActivity(browserIntent);
                 }
             });
         }

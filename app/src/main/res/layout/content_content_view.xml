@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--<ScrollView-->
-<!--android:layout_height="match_parent"-->
-<!--xmlns:android="http://schemas.android.com/apk/res/android"-->
-<!--android:fillViewport="true"-->
-<!--android:layout_width="match_parent">-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@android:color/white"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:fitsSystemWindows="false"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.rahul.myapplication.ContentViewActivity"
     tools:showIn="@layout/activity_content_view">
@@ -22,7 +17,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="17sp"
+        android:textSize="20sp"
         android:maxLines="2"
         android:ellipsize="end"
         android:id="@+id/content_title"
@@ -54,12 +49,12 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:maxLines="10"
+                android:maxLines="9"
                 android:ellipsize="end"
                 android:gravity="fill_horizontal"
                 android:text="No Description No Description erwerwerwe Descriptionerwerwerw Descriptionerwerwerw Descriptionerwerwerw Description erwerwerwe Descriptionerwerwerw Descriptionerwerwerw Descriptionerwerwerw Descriptionerwerwerwe Descriptionerwerwerw Descriptionerwerwerw Descriptionerwerwerw Descriptionerwerwerw Description \nerwerwerw Description \nerwerwerw Description erwerwerw Description \nerwerwerw Description erwerwerw Description erwerwerw Description erwerwerw"
                 android:id="@+id/desc"
-                android:textSize="13sp" />
+                android:textSize="14sp" />
         </ScrollView>
     </RelativeLayout>
 
@@ -69,6 +64,9 @@
         android:layout_marginTop="8dp"
         android:gravity="start"
         android:textSize="20sp"
+        android:shadowRadius="1"
+        android:shadowDy="1"
+        android:shadowDx="1"
         android:text="Download Links :-"
         android:id="@+id/downloadText"
         android:textStyle="bold"/>
@@ -76,6 +74,25 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="#FF5722">
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_marginTop="16dp"
+        android:id="@+id/download_link_loading">
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:layout_height="wrap_content"
+            android:text="loading..."/>
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
@@ -88,12 +105,5 @@
         android:id="@+id/recyclerList">
     </android.support.v7.widget.RecyclerView>
 
-    <!--<ScrollView-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:id="@+id/scrollView1">-->
-
-
-    <!--</ScrollView>-->
 
 </LinearLayout>

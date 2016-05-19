@@ -5,4 +5,5 @@ package com.rahul.myapplication;
  */
 public class Constants {
     public static final String SHORTEST_API_TOKEN_LINK = "http://sh.st/st/4aac64566051e85abb20f14559036ed9/";
+    public static final String UPDATE_CHECKER_URL = "http://rahulpandey1501-appupdates.blogspot.in/";
 }

@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setElevation(0);
+        CheckForUpdate.getStatus(MainActivity.this);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
