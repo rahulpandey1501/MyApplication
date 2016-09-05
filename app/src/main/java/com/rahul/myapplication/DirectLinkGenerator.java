@@ -22,18 +22,13 @@ public class DirectLinkGenerator {
     boolean flag = false;
     Context mContext;
     String outputLink = null;
+    public static String SERVER = Constants.SERVER_1;
 
     public String checkForLink(String link, Context context){
         mContext = context;
         for (String s: DirectSupportedLink.supportedLink){
             if (link.toLowerCase().contains(s.toLowerCase())) {
                 flag = true;
-//                new DirectLinkGeneratorAsync(new DirectLinkGeneratorAsync.AsyncResponse() {
-//                    @Override
-//                    public void processFinish(String output) {
-//                        outputLink =  output;
-//                    }
-//                }).execute(link);
                 new DirectLinkGeneratorAsync().execute(link);
                 break;
             }
@@ -71,22 +66,25 @@ public class DirectLinkGenerator {
             String directLink = "";
             Document document;
             try {
-                if (params[0].contains("uplod.it")){
+                if (params[0].contains("uplod.it") || params[0].contains("uploads.to")){
                     String id = params[0].substring(params[0].lastIndexOf("/")+1);
-                    Log.d("id", id);
-                    document = Jsoup.connect(params[0])
+                    document = Jsoup.connect(params[0].replace("uplod.it","uploads.to"))
                             .timeout(0)
-                            .userAgent("Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0")
-                            .followRedirects(true)
+                            .userAgent("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36")
                             .data("op", "download2")
                             .data("id", id)
                             .data("download_block", "0")
                             .data("down_script", "1")
                             .post();
-//                    Log.d("res", document.getElementsByClass("container").get(1).toString());
                     directLink = document.getElementsByClass("container").get(1).getElementsByTag("a").attr("href");
                 }else {
-                    document = Jsoup.connect(DirectSupportedLink.generatorLinkPrefix + params[0] + DirectSupportedLink.generatorLinkPostfix)
+                    String downloadLink;
+                    if (SERVER.equals(Constants.SERVER_1))
+                        downloadLink = DirectSupportedLink.generatorLinkPrefix_1 + params[0] + DirectSupportedLink.generatorLinkPostfix_1;
+                    else
+                        downloadLink = DirectSupportedLink.generatorLinkPrefix_2 + params[0] + DirectSupportedLink.generatorLinkPostfix_2;
+                    Log.d("res", downloadLink);
+                    document = Jsoup.connect(downloadLink)
                             .timeout(0)
                             .userAgent("Mozilla/5.0 (Windows NT 6.3; WOW64; rv:35.0) Gecko/20100101 Firefox/35.0")
                             .followRedirects(true)

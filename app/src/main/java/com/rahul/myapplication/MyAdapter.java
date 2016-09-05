@@ -9,6 +9,7 @@ import android.media.Image;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
+import android.text.ClipboardManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +36,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     public SharedPreferences sharedPreferences;
     public SharedPreferences.Editor sharedPreferencesEditor;
     static int currentPosition = 0;
-
     public MyAdapter(Context context, List<Information> list, boolean flag){
 
         inflater = LayoutInflater.from(context);
@@ -49,17 +49,17 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.recycler_item, parent, false);
-        MyViewHolder myViewHolder = new MyViewHolder(view);
-        return myViewHolder;
+        return new MyViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final MyViewHolder holder, final int position) {
+    public void onBindViewHolder(final MyViewHolder holder, int position) {
         final Information information = list.get(position);
         currentPosition = position;
         if (flag) {
             holder.title.setText(information.title.replace("is here", "").replace("[latest]", "").replace("!",""));
             holder.dTitle.setText(information.desc);
+            holder.date.setText(information.date);
             Picasso.with(context).load(information.image_link).into(holder.imageView);
             holder.itemView.setLongClickable(true);
             holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -86,23 +86,23 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
             holder.dLink.setText(information.link);
             for (String link: DirectSupportedLink.supportedLink){
                 if(information.link.toLowerCase().contains(link.toLowerCase())) {
-                    holder.dLink.setText(information.link + "  [DIRECT]");
+                    holder.directLinkIndicator.setVisibility(View.VISIBLE);
+                    holder.dLink.setText( "[DIRECT] "+information.link.toString());
                     break;
                 }
             }
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    DirectLinkGenerator dlg = new DirectLinkGenerator();
-                    String link = dlg.checkForLink(information.link, context);
-                    Intent browserIntent;
-//                    if (link != null){
-//                        browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
-//                    }else {
-//                        browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(information.link));
-//                    }
-//                    browserIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    context.startActivity(browserIntent);
+                    new DirectLinkGenerator().checkForLink(information.link, context);
+                }
+            });
+
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    copyToClipBoard(information.link);
+                    return true;
                 }
             });
         }
@@ -115,8 +115,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     class MyViewHolder extends RecyclerView.ViewHolder{
 
-        TextView title,dLink,dTitle;
+        TextView title,dLink,dTitle, date;
         ImageView imageView;
+        View directLinkIndicator;
+
         public MyViewHolder(View itemView) {
             super(itemView);
             Typeface tf = Typeface.createFromAsset(context.getAssets(), "fonts/Montserrat-Regular.ttf");
@@ -125,6 +127,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 title = (TextView) itemView.findViewById(R.id.title);
                 dTitle = (TextView) itemView.findViewById(R.id.titleDesc);
                 imageView = (ImageView) itemView.findViewById(R.id.imageView);
+                date = (TextView) itemView.findViewById(R.id.upload_date);
                 itemView.findViewById(R.id.descPageLayout).setVisibility(View.GONE);
                 title.setTypeface(tf);
                 dTitle.setTypeface(tfD);
@@ -132,6 +135,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
                 dTitle = (TextView) itemView.findViewById(R.id.dTitle);
                 dLink = (TextView) itemView.findViewById(R.id.dLink);
                 dTitle.setTypeface(tf);
+                directLinkIndicator = itemView.findViewById(R.id.direct_link_indicator);
                 itemView.findViewById(R.id.descPageLayout).setVisibility(View.VISIBLE);
                 itemView.findViewById(R.id.card_view_layout).setVisibility(View.GONE);
             }
@@ -150,5 +154,11 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     public int getCurrentPosition(){
         return currentPosition;
+    }
+
+    private void copyToClipBoard(String responseLink) {
+        ClipboardManager clipboard = (ClipboardManager) context.getSystemService(context.CLIPBOARD_SERVICE);
+        clipboard.setText(responseLink);
+        Toast.makeText(context, "Link copied to clipboard", Toast.LENGTH_SHORT).show();
     }
 }

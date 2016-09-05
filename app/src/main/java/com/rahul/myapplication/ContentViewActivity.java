@@ -90,23 +90,6 @@ public class ContentViewActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Please wait...");
         Picasso.with(ContentViewActivity.this).load(image_link).into(imageView);
 
-//        Picasso.with(getApplicationContext()).load(image_link).placeholder(getResources().getDrawable(R.drawable.header)).into(new Target() {
-//            @Override
-//            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom loadedFrom) {
-//                rootLayout.setBackground(new BitmapDrawable(getResources(), BlurBuilder.blur(getApplicationContext(), bitmap)));
-//            }
-//
-//            @Override
-//            public void onBitmapFailed(Drawable drawable) {
-//
-//            }
-//
-//            @Override
-//            public void onPrepareLoad(Drawable drawable) {
-//
-//            }
-//        });
-
         textView.setMovementMethod(new ScrollingMovementMethod());
         ((AppCompatActivity) this).getSupportActionBar().setHomeButtonEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -121,6 +104,7 @@ public class ContentViewActivity extends AppCompatActivity {
 
         isNetworkAvailable();
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -132,6 +116,18 @@ public class ContentViewActivity extends AppCompatActivity {
                                 startActivity(intent);
                             }
                         }).show();
+            }
+        });
+
+        imageView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (DirectLinkGenerator.SERVER.equals(Constants.SERVER_1))
+                    DirectLinkGenerator.SERVER = Constants.SERVER_2;
+                else
+                    DirectLinkGenerator.SERVER = Constants.SERVER_1;
+                Toast.makeText(getApplicationContext(), "Server Changed", Toast.LENGTH_SHORT).show();
+                return true;
             }
         });
     }
@@ -146,9 +142,7 @@ public class ContentViewActivity extends AppCompatActivity {
     }
 
     public void displayInterstitial() {
-        Log.d("abc", "hello");
         if (mInterstitialAd.isLoaded()) {
-            Log.d("abc", "13245");
             mInterstitialAd.show();
         }
     }

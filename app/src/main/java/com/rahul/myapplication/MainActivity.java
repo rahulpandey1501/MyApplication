@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,6 +15,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.text.InputType;
 import android.util.Log;
 import android.view.Gravity;
@@ -28,11 +30,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -44,9 +48,11 @@ public class MainActivity extends AppCompatActivity
 
     NavigationView navigationView;
     Toolbar toolbar;
-    final String DEFAULT_LINK = "http://onhax.net";
-    final String ANDROID_LINK = "http://onhax.net/android";
-    final String WINDOWS_LINK = "http://onhax.net/windows";
+    final String SEARCH_LINK = "http://onhax.net/?s=";
+    final String HOMEPAGE_LINK = "http://onhax.net/?paged=";
+    final String ANDROID_LINK = "http://onhax.net/?catg=androidapps&paged=";
+    final String WINDOWS_LINK = "http://onhax.net/?catg=pcapps&paged=";
+    final String ANDROID_GAMES = "https://onhax.net/?catg=androidgmods&paged=";
     public static final String SHAREDPREFRENCES_STRING = "SHAREDPREFRENCES_DATA";
     boolean doubleBackToExitPressedOnce = false;
     View parentLayout;
@@ -65,42 +71,47 @@ public class MainActivity extends AppCompatActivity
         parentLayout = findViewById(R.id.drawer_layout);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setElevation(0);
+
+//        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+//        View hView =  navigationView.getHeaderView(0);
+//        ImageView im = (ImageView) hView.findViewById(R.id.header_icon);
+//        Picasso.with(this).load(R.drawable.user).transform(new CircleTransform()).into(im);
+
         CheckForUpdate.getStatus(MainActivity.this);
-        fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                String link="";
-                if (id == R.id.nav_camera) {
-                    if (previous_id != id)
-                        count=2;
-                    link = ANDROID_LINK + "?lcp_page0=" + count;
-                    previous_id = id;
-                    title = "Android Application";
-                }
-                else if (id == R.id.nav_gallery) {
-                    if (previous_id != id)
-                        count=2;
-                    link = WINDOWS_LINK + "?lcp_page0=" + count;
-                    previous_id = id;
-                    title = "PC Softwares";
-                }
-                else {
-                    if (previous_id != id)
-                        count=2;
-                    link = DEFAULT_LINK + "?lcp_page0=" + count;
-                    previous_id = id;
-                    title = "All Applications";
-                }
-                Parser fragment= new Parser(link, title, list, false);
-                fragmentTransaction.replace(R.id.fragment_container, fragment);
-                fragmentTransaction.commit();
-                count++;
-            }
-        });
+//        fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                FragmentManager fragmentManager = getSupportFragmentManager();
+//                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//                String link="";
+//                if (id == R.id.nav_camera) {
+//                    if (previous_id != id)
+//                        count=2;
+//                    link = ANDROID_LINK + "?lcp_page0=" + count;
+//                    previous_id = id;
+//                    title = "Android Application";
+//                }
+//                else if (id == R.id.nav_gallery) {
+//                    if (previous_id != id)
+//                        count=2;
+//                    link = WINDOWS_LINK + "?lcp_page0=" + count;
+//                    previous_id = id;
+//                    title = "PC Softwares";
+//                }
+//                else {
+//                    if (previous_id != id)
+//                        count=2;
+//                    link = HOMEPAGE_LINK + "?lcp_page0=" + count;
+//                    previous_id = id;
+//                    title = "All Applications";
+//                }
+//                Parser fragment= new Parser(link, title, list, false);
+//                fragmentTransaction.replace(R.id.fragment_container, fragment);
+//                fragmentTransaction.commit();
+//                count++;
+//            }
+//        });
 
         initializeAd();
 
@@ -115,7 +126,7 @@ public class MainActivity extends AppCompatActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        Parser fragment= new Parser(DEFAULT_LINK, "xApps", list, false);
+        Parser fragment= new Parser(ANDROID_LINK, "xApps", list, false);
         fragmentTransaction.replace(R.id.fragment_container, fragment);
         fragmentTransaction.commit();
     }
@@ -197,7 +208,7 @@ public class MainActivity extends AppCompatActivity
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 list = new ArrayList<>();
-                Parser fragment = new Parser(DEFAULT_LINK + "/?s=" + query.replace(' ', '+'), "Search : " + query, list, true);
+                Parser fragment = new Parser(SEARCH_LINK + query.replace(' ', '+'), query, list, true);
                 fragmentTransaction.replace(R.id.fragment_container, fragment);
                 fragmentTransaction.commit();
                 setTitle(query);
@@ -255,11 +266,20 @@ public class MainActivity extends AppCompatActivity
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
 
-        } else if (id == R.id.nav_slideshow) {
+        }  else if (id == R.id.nav_games) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             list = new ArrayList<>();
-            Parser fragment= new Parser(DEFAULT_LINK, "All Applications", list, false);
+            Parser fragment= new Parser(ANDROID_GAMES, "Android Games", list, false);
+            fragmentTransaction.replace(R.id.fragment_container, fragment);
+            fragmentTransaction.commit();
+
+        }
+        else if (id == R.id.nav_slideshow) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            list = new ArrayList<>();
+            Parser fragment= new Parser(HOMEPAGE_LINK, "All Applications", list, false);
             fragmentTransaction.replace(R.id.fragment_container, fragment);
             fragmentTransaction.commit();
 
@@ -281,7 +301,7 @@ public class MainActivity extends AppCompatActivity
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     list = new ArrayList<>();
-                    Parser fragment = new Parser(DEFAULT_LINK + "/?s=" + input.getText().toString().replace(' ', '+'), "Search : " + input.getText().toString(), list, true);
+                    Parser fragment = new Parser(SEARCH_LINK + input.getText().toString().replace(' ', '+'), input.getText().toString(), list, true);
                     fragmentTransaction.replace(R.id.fragment_container, fragment);
                     fragmentTransaction.commit();
                 }

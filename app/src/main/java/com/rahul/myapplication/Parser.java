@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -40,18 +41,20 @@ public class Parser extends Fragment {
     View layout;
     RecyclerView recyclerView;
     MyAdapter myAdapter;
-    String link, title,image_link;
-    boolean fromSearch=false;
+    String link, title, image_link;
+    boolean fromSearch = false;
     private SwipeRefreshLayout swipeContainer;
     private int previousListCount = 1, pageCount = 1;
     LinearLayoutManager linearLayoutManager;
     LinearLayout progressBarLayout, swipeMessage;
     private boolean loading = true;
+
     public Parser() {
         // Required empty public constructor
     }
+
     @SuppressLint("ValidFragment")
-    public Parser(String link, String title,List<Information> list, boolean fromSearch){
+    public Parser(String link, String title, List<Information> list, boolean fromSearch) {
         this.link = link;
         this.title = title;
         this.fromSearch = fromSearch;
@@ -67,9 +70,10 @@ public class Parser extends Fragment {
         progressBarLayout = (LinearLayout) layout.findViewById(R.id.progressBar);
         swipeMessage = (LinearLayout) layout.findViewById(R.id.swipe_message);
         swipeMessage.setVisibility(View.GONE);
+
         progressBarLayout.setVisibility(View.VISIBLE);
         progressBarLayout.bringToFront();
-//        progressBarLayout.getLayoutParams().height = LinearLayout.LayoutParams.MATCH_PARENT;
+
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -92,6 +96,7 @@ public class Parser extends Fragment {
     class JsoupAsyncTask extends AsyncTask<String, Void, Boolean> {
 
         FloatingActionButton fab = ((MainActivity) getActivity()).getFloatingActionButton();
+
         @Override
         protected void onPreExecute() {
             if (!swipeContainer.isRefreshing()) {
@@ -99,6 +104,7 @@ public class Parser extends Fragment {
                 progressBarLayout.setVisibility(View.VISIBLE);
                 progressBarLayout.bringToFront();
             }
+//            swipeContainer.setRefreshing(true);
             previousListCount = list.size();
             if (fab != null)
                 fab.setVisibility(View.GONE);
@@ -108,7 +114,7 @@ public class Parser extends Fragment {
         @Override
         protected Boolean doInBackground(String... params) {
 //            link = params[0];
-            try{
+            try {
                 Log.d("link  ", params[0]);
                 document = Jsoup.connect(params[0])
                         .timeout(0)
@@ -116,11 +122,14 @@ public class Parser extends Fragment {
                         .followRedirects(true)
                         .get();
                 if (!fromSearch) {
-                    Elements elements = document.getElementById("lcp_instance_0").getElementsByTag("li");
+                    Elements elements = document.getElementsByClass("post_item");
                     for (org.jsoup.nodes.Element element : elements) {
                         Information information = new Information();
                         information.title = element.select("h2").text();
-                        information.link = element.select("a[href]").attr("href");
+                        information.link = element.attr("value");
+                        information.date = element.select("div.p_datafet").select("abbr").text();
+                        if (information.date.contains("on"))
+                            information.date = information.date.split("on")[1].trim();
                         image_link = element.select("img[src]").attr("src");
                         if (image_link.contains("resize=")) {
                             image_link = image_link.substring(0, image_link.indexOf("resize="));
@@ -128,36 +137,32 @@ public class Parser extends Fragment {
                         }
                         information.image_link = image_link;
 //                        element.getElementsByTag("div")
-                        information.desc = element.getElementsByTag("div").get(1).text();
+                        information.desc = element.select("div:has(p)").select("p").text();
                         list.add(information);
                     }
-                }else{
-                    if (!document.select("div.postcontent").isEmpty()) {
-                        Elements elements = document.select("div.postcontent");
-                        for (Element element : elements) {
-                            Information information = new Information();
-                            information.title = element.getAllElements().get(1).text();
-                            if (information.title.isEmpty())
-                                information.title = element.getAllElements().get(2).text();
-                            information.desc = element.select("p:not(p:has(strong))").get(1).text();
+                } else {
+                    Elements elements = document.getElementById("postlist").getElementsByClass("postcontent");
+                    for (Element element : elements) {
+                        Information information = new Information();
+                        information.title = element.getAllElements().get(1).text();
+                        information.date = "xApps";
+                        if (information.title.isEmpty())
+                            information.title = element.getAllElements().get(2).text();
+                        information.desc = element.select("p:not(p:has(strong))").text();
 //                            information.desc = element.select("p").get(2).text();
-                            information.link = element.select("a[href]").attr("href");
-                            image_link = element.select("img[src]").attr("src");
-                            if (image_link.contains("resize=")) {
-                                image_link = image_link.substring(0, image_link.indexOf("resize="));
-                                image_link = image_link + "resize=150%2C150";
-                            }
-                            information.image_link = image_link;
-                            list.add(information);
+                        information.link = element.select("a[href]").attr("href");
+                        image_link = element.select("img[src]").attr("src");
+                        if (image_link.contains("resize=")) {
+                            image_link = image_link.substring(0, image_link.indexOf("resize="));
+                            image_link = image_link + "resize=150%2C150";
                         }
-                    }else{
-//                        Toast.makeText(getContext(), "Content not found :-(", Toast.LENGTH_SHORT).show();
+                        information.image_link = image_link;
+                        list.add(information);
                     }
                 }
-            }
-            catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
-            }finally {
+            } finally {
                 return null;
             }
         }
@@ -173,14 +178,16 @@ public class Parser extends Fragment {
                 }
                 if (list.isEmpty() || list.size() == previousListCount) {
                     loading = true;
-                    Toast.makeText(getContext(), "Content not found"+" may be its network problem "+"please try again", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Content not found" + " may be its network problem " + "please try again", Toast.LENGTH_SHORT).show();
                     if (pageCount > 1)
                         pageCount--;
                 } else {
+
+                    swipeContainer.setRefreshing(false);
                     progressBarLayout.setAnimation(CustomAnimation.fadeOut(getContext()));
                     progressBarLayout.setVisibility(View.GONE);
-                    if (previousListCount+recyclerView.getChildCount()-2 >= 0)
-                        recyclerView.smoothScrollToPosition(previousListCount+recyclerView.getChildCount()-2);
+                    if (previousListCount + recyclerView.getChildCount() - 2 >= 0)
+                        recyclerView.smoothScrollToPosition(previousListCount + recyclerView.getChildCount() - 2);
                     recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
                         @Override
@@ -196,6 +203,7 @@ public class Parser extends Fragment {
                     });
                     loading = true;
                 }
+                swipeContainer.setRefreshing(false);
                 progressBarLayout.setAnimation(CustomAnimation.fadeOut(getContext()));
                 progressBarLayout.setVisibility(View.GONE);
                 progressBarLayout.getLayoutParams().height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 45, getResources().getDisplayMetrics());
@@ -211,21 +219,16 @@ public class Parser extends Fragment {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        if (activeNetworkInfo != null && activeNetworkInfo.isConnected()){
+        if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
             Log.d("network", "async  called");
-//            JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask();
             if (fromSearch) {
                 new JsoupAsyncTask().execute(link);
             }
-            else if (pageCount > 1)
-                new JsoupAsyncTask().execute(link + "?lcp_page0=" + pageCount);
-            else
-                new JsoupAsyncTask().execute(link);
-        }
-        else showDialogBox();
+            new JsoupAsyncTask().execute(link + pageCount);
+        } else showDialogBox();
     }
 
-    public boolean showDialogBox(){
+    public boolean showDialogBox() {
         android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(getContext());
         dialog.setTitle("Network Connectivity");
         dialog.setMessage("No internet connection detected please try again");
@@ -246,11 +249,12 @@ public class Parser extends Fragment {
         dialog.show();
         return true;
     }
-    public void intializeRecyclerView(){
 
-        myAdapter = new MyAdapter(getContext(), list, true);
+    public void intializeRecyclerView() {
+
+        myAdapter = new MyAdapter(getActivity(), list, true);
         recyclerView.setAdapter(myAdapter);
-        linearLayoutManager = new LinearLayoutManager(getActivity(),LinearLayoutManager.VERTICAL,false);
+        linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
 //                linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(linearLayoutManager);
     }
